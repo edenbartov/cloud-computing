@@ -28,7 +28,7 @@ def get_live_node_list():
     # response = table.scan()
     now = datetime.now()
     past_periond = now - datetime.timedelta(seconds=delay_period)
-     response = table.query(
+    response = table.query(
         KeyConditionExpression=Key('lastAlive').between(str(past_periond), str(now))
     )
     return (x['ip'] for x in response['items'])
