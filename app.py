@@ -1,4 +1,3 @@
-import redis
 import json
 import xxhash
 from datetime import datetime
