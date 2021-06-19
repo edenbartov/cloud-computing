@@ -110,7 +110,13 @@ Resources:
               - "sts:AssumeRole"
       Path: "/"
   
-
+  MyInstanceProfile: 
+    Type: "AWS::IAM::InstanceProfile"
+    Properties: 
+      Path: "/"
+      Roles: 
+        - 
+          Ref: "TableRole"
 
   InstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -134,6 +140,7 @@ Resources:
         - !Ref InstanceSecurityGroup
       KeyName: !Ref KeyName
       ImageId: !Ref LatestAmiId
+      IamInstanceProfile:  !Ref MyInstanceProfile
       UserData:
         Fn::Base64: !Sub
         - |
@@ -144,11 +151,12 @@ Resources:
           sudo apt-get update
           sudo apt-get install python3-pip -y
           sudo apt-get install python3-flask -y
-          sudo apt-get install redis-server -y
-          sudo service redis-server start
-          pip3 install redis
+          pip install xxhash
+          pip install boto3
         - {
-          }  
+          }
+    DependsOn:
+      - TableRole
 
   EC2Instance2:
     Type: AWS::EC2::Instance
@@ -158,6 +166,7 @@ Resources:
         - !Ref InstanceSecurityGroup
       KeyName: !Ref KeyName
       ImageId: !Ref LatestAmiId
+      IamInstanceProfile:  !Ref MyInstanceProfile
       UserData:
         Fn::Base64: !Sub
         - |
@@ -168,11 +177,13 @@ Resources:
           sudo apt-get update
           sudo apt-get install python3-pip -y
           sudo apt-get install python3-flask -y
-          sudo apt-get install redis-server -y
-          sudo service redis-server start
-          pip3 install redis
+          pip install xxhash
+          pip install boto3
         - {
           }
+    DependsOn:
+      - TableRole
+
 
   EC2Instance3:
     Type: AWS::EC2::Instance
@@ -182,6 +193,7 @@ Resources:
         - !Ref InstanceSecurityGroup
       KeyName: !Ref KeyName
       ImageId: !Ref LatestAmiId
+      IamInstanceProfile:  !Ref MyInstanceProfile
       UserData:
         Fn::Base64: !Sub
         - |
@@ -192,11 +204,13 @@ Resources:
           sudo apt-get update
           sudo apt-get install python3-pip -y
           sudo apt-get install python3-flask -y
-          sudo apt-get install redis-server -y
-          sudo service redis-server start
-          pip3 install redis
+          pip install xxhash
+          pip install boto3
         - {
-          }  
+          }
+    DependsOn:
+      - TableRole
+
 
   EC2Instance4:
     Type: AWS::EC2::Instance
@@ -206,6 +220,7 @@ Resources:
         - !Ref InstanceSecurityGroup
       KeyName: !Ref KeyName
       ImageId: !Ref LatestAmiId
+      IamInstanceProfile:  !Ref MyInstanceProfile
       UserData:
         Fn::Base64: !Sub
         - |
@@ -216,11 +231,13 @@ Resources:
           sudo apt-get update
           sudo apt-get install python3-pip -y
           sudo apt-get install python3-flask -y
-          sudo apt-get install redis-server -y
-          sudo service redis-server start
-          pip3 install redis
+          pip install xxhash
+          pip install boto3
         - {
-          }  
+          }
+    DependsOn:
+      - TableRole
+
 
   ELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
