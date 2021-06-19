@@ -101,10 +101,12 @@ def get_internaly():
                            'item': item[0]})
     return response
 
-now = datetime.now()
-if (now.second> (last +10)%60):
-    last  =  now.second
-    signal_alive()
-
+def checker_thread():
+    while True:
+        signal_alive()
+        time.sleep(5)
+  
 if __name__ == '__main__':
+    x = threading.Thread(target=checker_thread)
+    x.start()
     app.run(host="0.0.0.0")
