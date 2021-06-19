@@ -1,3 +1,4 @@
+import redis
 import json
 import xxhash
 from datetime import datetime
@@ -7,15 +8,15 @@ import boto3
 import threading
 import socket
 
-dynamodb = boto3.resource('dynamodb',region_name="us-east-1")
-table = dynamodb.Table('LivingNodes')
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('LivingNodes',endpoint_url="http://localhost:8000")
 cache = {}
 app = Flask(__name__)
 delay_period = 15
 last = 0 
 
 def signal_alive():
-    timestamp = str(datetime.now())
+    timestamp = get_milis(datetime.now())
     ip = socket.gethostbyname(socket.gethostname())
     print(timestamp)
     item = {'ip': ip,
@@ -28,11 +29,12 @@ def get_live_node_list():
     now = datetime.now()
     past_periond = now - datetime.timedelta(seconds=delay_period)
     response = table.query(
-        KeyConditionExpression=Key('lastAlive').between(str(past_periond), str(now))
+        KeyConditionExpression=Key('lastAlive').between(get_milis(past_periond), get_milis(now))
     )
     return (x['ip'] for x in response['items'])
 
-
+def get_milis(dt):
+    int(round(dt.timestamp() * 1000))
 
 def get_nodes(key):
     nodes = get_live_node_list()
