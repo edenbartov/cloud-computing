@@ -17,7 +17,6 @@ last = 0
 def signal_alive():
     timestamp = get_milis(datetime.now())
     ip = socket.gethostbyname(socket.gethostname())
-    print(timestamp)
     item = {'ip': ip,
             'lastAlive': timestamp
             }
