@@ -33,7 +33,7 @@ def get_live_node_list():
     return (x['ip'] for x in response['items'])
 
 def get_milis(dt):
-    int(round(dt.timestamp() * 1000))
+    return (int(round(dt.timestamp() * 1000)))
 
 def get_nodes(key):
     nodes = get_live_node_list()
