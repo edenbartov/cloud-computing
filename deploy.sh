@@ -58,26 +58,22 @@ PUBLIC_IP_2=$(aws cloudformation --region $REGION describe-stacks --stack-name y
 PUBLIC_IP_3=$(aws cloudformation --region $REGION describe-stacks --stack-name yaron-eden-stack --query "Stacks[0].Outputs[?OutputKey=='Instance3IP'].OutputValue" --output text)
 PUBLIC_IP_4=$(aws cloudformation --region $REGION describe-stacks --stack-name yaron-eden-stack --query "Stacks[0].Outputs[?OutputKey=='Instance4IP'].OutputValue" --output text)
 
-ssh-add ./$KEY_PEM
+# ssh-add ./$KEY_PEM
 
-echo "uploding code to instances"
-scp -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=60" app.py ubuntu@$PUBLIC_IP_1:/home/ubuntu/
-scp -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=60" app.py ubuntu@$PUBLIC_IP_2:/home/ubuntu/
-scp -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=60" app.py ubuntu@$PUBLIC_IP_3:/home/ubuntu/
-scp -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=60" app.py ubuntu@$PUBLIC_IP_4:/home/ubuntu/
-echo "done uploading"
+echo "cloning repo"
+ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_1 'git clone https://github.com/edenbartov/cloud-computing.git'
+ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_2 'git clone https://github.com/edenbartov/cloud-computing.git'
+ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_3 'git clone https://github.com/edenbartov/cloud-computing.git'
+ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_4 'git clone https://github.com/edenbartov/cloud-computing.git'
+
+echo "waiting 10 seconds for all the dependecies to install"
+sleep 10
 
 echo "running the code"
-
-ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_1 <<EOF
-    sudo apt-get update
-    sudo apt-get install python3-pip -y
-    sudo apt-get install python3-flask -y
-    # run app
-    nohup flask run --host 0.0.0.0  &>/dev/null &
-    exit
-EOF
-
+ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_1 'cd cloud-computing && python3 app.py'
+ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_2 'cd cloud-computing && python3 app.py'
+ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_3 'cd cloud-computing && python3 app.py'
+ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_4 'cd cloud-computing && python3 app.py'
 
 echo "done"
 
