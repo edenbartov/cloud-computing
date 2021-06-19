@@ -8,7 +8,7 @@ import threading
 import socket
 
 dynamodb = boto3.resource('dynamodb',region_name="us-east-1")
-table = dynamodb.Table('living_nodes')
+table = dynamodb.Table('LivingNodes')
 cache = {}
 app = Flask(__name__)
 delay_period = 15
