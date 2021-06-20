@@ -37,7 +37,7 @@ def get_live_node_list():
     try:
         app.logger.info('get_live_node_list')
         now = datetime.now()
-        past_periond = now - datetime.timedelta(seconds=delay_period)
+        #past_periond = now - datetime.timedelta(seconds=delay_period)
         # response = table.query(
         #     KeyConditionExpression=Key('lastAlive').between(get_milis(past_periond), get_milis(now))
         # )
