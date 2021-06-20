@@ -130,7 +130,7 @@ Resources:
       - IpProtocol: tcp
         FromPort: 8080
         ToPort: 8080
-        CidrIp: !Ref 'VPCcidr'
+        CidrIp: '0.0.0.0/0'
 
   EC2Instance1:
     Type: AWS::EC2::Instance
@@ -142,19 +142,19 @@ Resources:
       ImageId: !Ref LatestAmiId
       IamInstanceProfile:  !Ref MyInstanceProfile
       UserData:
-        Fn::Base64: !Sub
-        - |
-          #!/bin/bash
-          exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
-          # Sleep for the instance role might not be properly attached
-          sleep 10
-          sudo apt-get update
-          sudo apt-get install python3-pip -y
-          sudo apt-get install python3-flask -y
-          pip install xxhash
-          pip install boto3
-        - {
-          }
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            # Sleep for the instance role might not be properly attached
+            sleep 10
+            sudo apt-get update
+            sudo apt-get install python3-pip -y
+            sudo apt-get install python3-flask -y
+            pip3 install xxhash
+            pip3 install boto3
+            cd /home/ubuntu
+            git clone https://github.com/edenbartov/cloud-computing.git
+            cd cloud-computing && python3 app.py
     DependsOn:
       - TableRole
 
@@ -168,19 +168,19 @@ Resources:
       ImageId: !Ref LatestAmiId
       IamInstanceProfile:  !Ref MyInstanceProfile
       UserData:
-        Fn::Base64: !Sub
-        - |
-          #!/bin/bash
-          exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
-          # Sleep for the instance role might not be properly attached
-          sleep 10
-          sudo apt-get update
-          sudo apt-get install python3-pip -y
-          sudo apt-get install python3-flask -y
-          pip install xxhash
-          pip install boto3
-        - {
-          }
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            # Sleep for the instance role might not be properly attached
+            sleep 10
+            sudo apt-get update
+            sudo apt-get install python3-pip -y
+            sudo apt-get install python3-flask -y
+            pip3 install xxhash
+            pip3 install boto3
+            cd /home/ubuntu
+            git clone https://github.com/edenbartov/cloud-computing.git
+            cd cloud-computing && python3 app.py
     DependsOn:
       - TableRole
 
@@ -195,19 +195,19 @@ Resources:
       ImageId: !Ref LatestAmiId
       IamInstanceProfile:  !Ref MyInstanceProfile
       UserData:
-        Fn::Base64: !Sub
-        - |
-          #!/bin/bash
-          exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
-          # Sleep for the instance role might not be properly attached
-          sleep 10
-          sudo apt-get update
-          sudo apt-get install python3-pip -y
-          sudo apt-get install python3-flask -y
-          pip install xxhash
-          pip install boto3
-        - {
-          }
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            # Sleep for the instance role might not be properly attached
+            sleep 10
+            sudo apt-get update
+            sudo apt-get install python3-pip -y
+            sudo apt-get install python3-flask -y
+            pip3 install xxhash
+            pip3 install boto3
+            cd /home/ubuntu
+            git clone https://github.com/edenbartov/cloud-computing.git
+            cd cloud-computing && python3 app.py
     DependsOn:
       - TableRole
 
@@ -222,19 +222,19 @@ Resources:
       ImageId: !Ref LatestAmiId
       IamInstanceProfile:  !Ref MyInstanceProfile
       UserData:
-        Fn::Base64: !Sub
-        - |
-          #!/bin/bash
-          exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
-          # Sleep for the instance role might not be properly attached
-          sleep 10
-          sudo apt-get update
-          sudo apt-get install python3-pip -y
-          sudo apt-get install python3-flask -y
-          pip install xxhash
-          pip install boto3
-        - {
-          }
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            # Sleep for the instance role might not be properly attached
+            sleep 10
+            sudo apt-get update
+            sudo apt-get install python3-pip -y
+            sudo apt-get install python3-flask -y
+            pip3 install xxhash
+            pip3 install boto3
+            cd /home/ubuntu
+            git clone https://github.com/edenbartov/cloud-computing.git
+            cd cloud-computing && python3 app.py
     DependsOn:
       - TableRole
 
