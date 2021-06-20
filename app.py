@@ -16,11 +16,6 @@ delay_period = 15
 last = 0 
 ip_address = ""
 
-def strat_app():
-	ip_address = requests.get('https://api.ipify.org').text
-	print('My public IP address is: {}'.format(ip_address))	
-	x = threading.Thread(target=checker_thread)
-	x.start()
 
 def signal_alive():
     timestamp = get_milis(datetime.now())
@@ -113,7 +108,10 @@ def checker_thread():
     	signal_alive()
     	time.sleep(5)
 
-strat_app()
   
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+	ip_address = requests.get('https://api.ipify.org').text
+	print('My public IP address is: {}'.format(ip_address))	
+	x = threading.Thread(target=checker_thread)
+	x.start()
+	app.run(host='0.0.0.0', port=5000)
