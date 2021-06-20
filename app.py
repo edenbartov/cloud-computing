@@ -17,8 +17,9 @@ app = Flask(__name__)
 delay_period = 30
 last = 0 
 ip_address = ""
-logging.basicConfig(level=logging.DEBUG)
-
+logger = logging.getLogger('werkzeug') # grabs underlying WSGI logger
+handler = logging.FileHandler('test.log') # creates handler for the log file
+logger.addHandler(handler) # adds handler to the werkzeug WSGI logger
 
 @app.route('/health-check', methods=['GET', 'POST'])
 def health_check():
