@@ -20,7 +20,6 @@ ip_address = ""
 logger = logging.getLogger('werkzeug') # grabs underlying WSGI logger
 handler = logging.FileHandler('test.log') # creates handler for the log file
 logger.addHandler(handler) # adds handler to the werkzeug WSGI logger
-app.logger.setLevel(logging.DEBUG)         # Set the log level to debug
 
 
 @app.route('/health-check', methods=['GET', 'POST'])
@@ -31,6 +30,8 @@ def health_check():
         }
     table.put_item(Item=item)
     return f'it is I {ip_address} - at time {timestamp} im still alive'
+
+
 
 def get_live_node_list():
     try:
@@ -133,6 +134,17 @@ def get_internaly():
     return response
 
 
+@app.route('/test', methods=['GET', 'POST'])
+def get_internaly():
+    func = request.args.get('func')
+    # getting the data out of the cache
+    if func == 'get_live_node_list':
+        item = get_live_node_list()
+    elif func == 'get_nodes':
+        item,_ = get_nodes()
+    response = json.dumps({'status code': 200,
+                           'item': item})
+    return response
   
 if __name__ == '__main__':
     ip_address = requests.get('https://api.ipify.org').text
