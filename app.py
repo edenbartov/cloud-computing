@@ -24,7 +24,7 @@ def strat_app():
 
 def signal_alive():
     timestamp = get_milis(datetime.now())
-    item = {'ip': ip,
+    item = {'ip': ip_address,
             'lastAlive': timestamp
             }
     table.put_item(Item=item)
