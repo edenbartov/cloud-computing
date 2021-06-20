@@ -35,14 +35,15 @@ def health_check():
 
 def get_live_node_list():
     try:
-        app.logger.info('get_live_node_list')
-        now = datetime.now()
-        past_periond = now - datetime.timedelta(seconds=delay_period)
-        response = table.query(
-            KeyConditionExpression=Key('lastAlive').between(get_milis(past_periond), get_milis(now))
-        )
-        app.logger.info(f'get_live_node_list-  responde: {response}')
-        return (x['ip'] for x in response['items'])
+        # app.logger.info('get_live_node_list')
+        # now = datetime.now()
+        # past_periond = now - datetime.timedelta(seconds=delay_period)
+        # response = table.query(
+        #     KeyConditionExpression=Key('lastAlive').between(get_milis(past_periond), get_milis(now))
+        # )
+        # app.logger.info(f'get_live_node_list-  responde: {response}')
+        # return (x['ip'] for x in response['items'])
+        return [ip_address]
     except:
             app.logger.info(f'error in get_live_node_list')
             return "failed in the get_live_node_list"
