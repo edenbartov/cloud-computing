@@ -14,7 +14,7 @@ dynamodb = boto3.resource('dynamodb',region_name="us-east-1")
 table = dynamodb.Table('LivingNodes')
 cache = {}
 app = Flask(__name__)
-delay_period = 30
+delay_period = 30 * 1000
 last = 0 
 ip_address = ""
 logger = logging.getLogger('werkzeug') # grabs underlying WSGI logger
@@ -36,15 +36,18 @@ def health_check():
 def get_live_node_list():
     try:
         app.logger.info('get_live_node_list')
-        now = datetime.now()
+        now = get_milis(datetime.now())
         #past_periond = now - datetime.timedelta(seconds=delay_period)
         # response = table.query(
         #     KeyConditionExpression=Key('lastAlive').between(get_milis(past_periond), get_milis(now))
         # )
         response = table.scan()
         app.logger.info(f'get_live_node_list-  responde: {response}')
-        return (x['ip'] for x in response['Items'])
-        return [ip_address]
+        nodes = []
+        for x in response['Items']:
+            if (int)(x['lastAlive']) > now - delay_period:
+                nodes.append(x['ip'])
+        return nodes
     except Exception as e:
             app.logger.info(f'error in get_live_node_list {e}')
             return "failed in the get_live_node_list"
@@ -61,8 +64,8 @@ def get_nodes(key):
         alt_node = nodes[((temp_key + 1) % len(nodes))]
         app.logger.info(f'get_nodes: node: {node}, nodes: {nodes}')
         return node, alt_node
-    except:
-        app.logger.info(f'failed in the get_nodes')
+    except Exception as e:
+        app.logger.info(f'failed in the get_nodes {e}')
         return "failed in the get_nodes"
 
 
@@ -83,8 +86,8 @@ def put():
         expiration_date = request.args.get('expiration_date')
         
         node, alt_node =  get_nodes(key)
-    except:
-        app.logger.info(f'failed in the put when getting the arguments')
+    except Exception as e:
+        app.logger.info(f'failed in the put when getting the arguments {e}')
         return "failed in the put when getting the arguments"
     try:
         app.logger.info(f'tring to send request to other node')
