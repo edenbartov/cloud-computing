@@ -19,30 +19,36 @@ ip_address = ""
 
 @app.route('/health-check', methods=['GET', 'POST'])
 def health_check():
-	timestamp = get_milis(datetime.now())
-	item = {'ip': ip_address,
-	    'lastAlive': timestamp
-	    }
-	table.put_item(Item=item)
-	return f'it is I {ip_address} - at time {timestamp} im still alive'
+    timestamp = get_milis(datetime.now())
+    item = {'ip': ip_address,
+        'lastAlive': timestamp
+        }
+    table.put_item(Item=item)
+    return f'it is I {ip_address} - at time {timestamp} im still alive'
 
 def get_live_node_list():
-    now = datetime.now()
-    past_periond = now - datetime.timedelta(seconds=delay_period)
-    response = table.query(
-        KeyConditionExpression=Key('lastAlive').between(get_milis(past_periond), get_milis(now))
-    )
-    return (x['ip'] for x in response['items'])
+    try:
+        now = datetime.now()
+        past_periond = now - datetime.timedelta(seconds=delay_period)
+        response = table.query(
+            KeyConditionExpression=Key('lastAlive').between(get_milis(past_periond), get_milis(now))
+        )
+        return (x['ip'] for x in response['items'])
+    except:
+            return "failed in the get_live_node_list"
 
 def get_milis(dt):
     return (int(round(dt.timestamp() * 1000)))
 
 def get_nodes(key):
-    nodes = get_live_node_list()
-    temp_key = xxhash.xxh64_intdigest(key) % 1024
-    node = nodes[(temp_key % len(nodes))]
-    alt_node = nodes[((temp_key + 1) % len(nodes))]
-    return node, alt_node
+    try:
+        nodes = get_live_node_list()
+        temp_key = xxhash.xxh64_intdigest(key) % 1024
+        node = nodes[(temp_key % len(nodes))]
+        alt_node = nodes[((temp_key + 1) % len(nodes))]
+        return node, alt_node
+    except:
+        return "failed in the get_nodes"
 
 def get_url(node, key, op, data=None, expiration_date=None):
     if op == 'put':
@@ -53,12 +59,14 @@ def get_url(node, key, op, data=None, expiration_date=None):
 
 @app.route('/put', methods=['GET', 'POST'])
 def put():
-    key = request.args.get('str_key')
-    data = request.args.get('data')
-    expiration_date = request.args.get('expiration_date')
-    
-    node, alt_node =  get_nodes(key)
-
+    try:
+        key = request.args.get('str_key')
+        data = request.args.get('data')
+        expiration_date = request.args.get('expiration_date')
+        
+        node, alt_node =  get_nodes(key)
+    except:
+        return "failed in the put when getting the arguments"
     try:
         ans = requests.post(get_url(node,key,'put',data,expiration_date,))
         ans = requests.post(get_url(alt_node,key,'put',data,expiration_date,))
@@ -86,14 +94,17 @@ def get():
 
 @app.route('/put_internaly', methods=['GET', 'POST'])
 def put_internaly():
-    key = request.args.get('str_key')
-    data = request.args.get('data')
-    expiration_date = request.args.get('expiration_date')
-    #actually seting the data
-    cache[key] = (data, expiration_date)
-    print(cache)
-    return json.dumps({'status code': 200,
-                       'item': cache[key]})
+    try:
+        key = request.args.get('str_key')
+        data = request.args.get('data')
+        expiration_date = request.args.get('expiration_date')
+        #actually seting the data
+        cache[key] = (data, expiration_date)
+        print(cache)
+        return json.dumps({'status code': 200,
+                           'item': cache[key]})
+    except:
+        return "failed in put_internaly"
 
 @app.route('/get_internaly', methods=['GET', 'POST'])
 def get_internaly():
@@ -107,6 +118,6 @@ def get_internaly():
 
   
 if __name__ == '__main__':
-	ip_address = requests.get('https://api.ipify.org').text
-	print('My public IP address is: {}'.format(ip_address))	
-	app.run(host='0.0.0.0', port=8080)
+    ip_address = requests.get('https://api.ipify.org').text
+    print('My public IP address is: {}'.format(ip_address)) 
+    app.run(host='0.0.0.0', port=8080)
