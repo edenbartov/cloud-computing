@@ -3,7 +3,7 @@ import xxhash
 from datetime import datetime
 from flask import Flask, request
 import requests
-# import boto3
+import boto3
 import threading
 import time
 import socket
