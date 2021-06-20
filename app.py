@@ -43,7 +43,7 @@ def get_live_node_list():
         # )
         response = table.scan()
         app.logger.info(f'get_live_node_list-  responde: {response}')
-        return (x['ip'] for x in response['items'])
+        return (x['ip'] for x in response['Items'])
         return [ip_address]
     except Exception as e:
             app.logger.info(f'error in get_live_node_list {e}')
