@@ -20,11 +20,11 @@ ip_address = ""
 @app.route('/health-check', methods=['GET', 'POST'])
 def health_check():
 	timestamp = get_milis(datetime.now())
-    item = {'ip': ip_address,
-            'lastAlive': timestamp
-            }
-    table.put_item(Item=item)
-    return f'it is I {ip_address} - at time {timestamp} im still alive'
+	item = {'ip': ip_address,
+	    'lastAlive': timestamp
+	    }
+	table.put_item(Item=item)
+	return f'it is I {ip_address} - at time {timestamp} im still alive'
 
 def get_live_node_list():
     now = datetime.now()
