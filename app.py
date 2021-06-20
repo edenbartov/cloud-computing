@@ -135,7 +135,7 @@ def get_internaly():
 
 
 @app.route('/test', methods=['GET', 'POST'])
-def get_internaly():
+def test():
     func = request.args.get('func')
     # getting the data out of the cache
     if func == 'get_live_node_list':
