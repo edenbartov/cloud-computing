@@ -17,8 +17,9 @@ app = Flask(__name__)
 delay_period = 30
 last = 0 
 ip_address = ""
-handler = logging.FileHandler("test.log")  # Create the file logger
-app.logger.addHandler(handler)             # Add it to the built-in logger
+logger = logging.getLogger('werkzeug') # grabs underlying WSGI logger
+handler = logging.FileHandler('test.log') # creates handler for the log file
+logger.addHandler(handler) # adds handler to the werkzeug WSGI logger
 app.logger.setLevel(logging.DEBUG)         # Set the log level to debug
 
 
