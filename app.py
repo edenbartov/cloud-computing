@@ -6,6 +6,7 @@ import requests
 import boto3
 import threading
 import socket
+import time
 
 dynamodb = boto3.resource('dynamodb',region_name="us-east-1")
 table = dynamodb.Table('LivingNodes')
