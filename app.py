@@ -14,7 +14,7 @@ dynamodb = boto3.resource('dynamodb',region_name="us-east-1")
 table = dynamodb.Table('LivingNodes')
 cache = {}
 app = Flask(__name__)
-delay_period = 30 * 1000
+delay_period = 30 * 1000 # 30 seconds in milis
 last = 0 
 ip_address = ""
 logger = logging.getLogger('werkzeug') # grabs underlying WSGI logger
@@ -37,15 +37,11 @@ def get_live_node_list():
     try:
         app.logger.info('get_live_node_list')
         now = get_milis(datetime.now())
-        #past_periond = now - datetime.timedelta(seconds=delay_period)
-        # response = table.query(
-        #     KeyConditionExpression=Key('lastAlive').between(get_milis(past_periond), get_milis(now))
-        # )
         response = table.scan()
         app.logger.info(f'get_live_node_list-  responde: {response}')
         nodes = []
         for x in response['Items']:
-            if (int)(x['lastAlive']) > now - delay_period:
+            if (int)(x['lastAlive']) >= now - delay_period:
                 nodes.append(x['ip'])
         return nodes
     except Exception as e:
@@ -138,20 +134,8 @@ def get_internaly():
                            'item': item[0]})
     return response
 
-
-@app.route('/test', methods=['GET', 'POST'])
-def test():
-    func = request.args.get('func')
-    # getting the data out of the cache
-    if func == 'get_live_node_list':
-        item = get_live_node_list()
-    elif func == 'get_nodes':
-        item,_ = get_nodes()
-    response = json.dumps({'status code': 200,
-                           'item': item})
-    return response
   
 if __name__ == '__main__':
     ip_address = requests.get('https://api.ipify.org').text
     print('My public IP address is: {}'.format(ip_address)) 
-    app.run(host='0.0.0.0', port=8080,debug=True)
+    app.run(host='0.0.0.0', port=8080)
