@@ -45,8 +45,8 @@ def get_live_node_list():
         app.logger.info(f'get_live_node_list-  responde: {response}')
         return (x['ip'] for x in response['items'])
         return [ip_address]
-    except:
-            app.logger.info(f'error in get_live_node_list')
+    except Exception as e:
+            app.logger.info(f'error in get_live_node_list {e}')
             return "failed in the get_live_node_list"
 
 def get_milis(dt):
