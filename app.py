@@ -7,14 +7,17 @@ import boto3
 import threading
 import time
 import socket
+import logging
+
 
 dynamodb = boto3.resource('dynamodb',region_name="us-east-1")
 table = dynamodb.Table('LivingNodes')
 cache = {}
 app = Flask(__name__)
-delay_period = 15
+delay_period = 30
 last = 0 
 ip_address = ""
+logging.basicConfig(level=logging.DEBUG)
 
 
 @app.route('/health-check', methods=['GET', 'POST'])
@@ -28,13 +31,16 @@ def health_check():
 
 def get_live_node_list():
     try:
+        app.logger.info('get_live_node_list')
         now = datetime.now()
         past_periond = now - datetime.timedelta(seconds=delay_period)
         response = table.query(
             KeyConditionExpression=Key('lastAlive').between(get_milis(past_periond), get_milis(now))
         )
+        app.logger.info(f'get_live_node_list-  responde: {response}')
         return (x['ip'] for x in response['items'])
     except:
+            app.logger.info(f'error in get_live_node_list')
             return "failed in the get_live_node_list"
 
 def get_milis(dt):
@@ -42,13 +48,17 @@ def get_milis(dt):
 
 def get_nodes(key):
     try:
+        app.logger.info(f'get_nodes')
         nodes = get_live_node_list()
         temp_key = xxhash.xxh64_intdigest(key) % 1024
         node = nodes[(temp_key % len(nodes))]
         alt_node = nodes[((temp_key + 1) % len(nodes))]
+        app.logger.info(f'get_nodes: node: {node}, nodes: {nodes}')
         return node, alt_node
     except:
+        app.logger.info(f'failed in the get_nodes')
         return "failed in the get_nodes"
+
 
 def get_url(node, key, op, data=None, expiration_date=None):
     if op == 'put':
@@ -60,16 +70,20 @@ def get_url(node, key, op, data=None, expiration_date=None):
 @app.route('/put', methods=['GET', 'POST'])
 def put():
     try:
+        app.logger.info(f'put')
+
         key = request.args.get('str_key')
         data = request.args.get('data')
         expiration_date = request.args.get('expiration_date')
         
         node, alt_node =  get_nodes(key)
     except:
+        app.logger.info(f'failed in the put when getting the arguments')
         return "failed in the put when getting the arguments"
     try:
-        ans = requests.post(get_url(node,key,'put',data,expiration_date,))
-        ans = requests.post(get_url(alt_node,key,'put',data,expiration_date,))
+        app.logger.info(f'tring to send request to other node')
+        ans = requests.post(get_url(node,key,'put',data,expiration_date))
+        ans = requests.post(get_url(alt_node,key,'put',data,expiration_date))
     except:
         return json.dumps({'status_code': 404}).json()
     
