@@ -17,15 +17,16 @@ last = 0
 ip_address = ""
 
 
-def signal_alive():
-    timestamp = get_milis(datetime.now())
+@app.route('/health-check', methods=['GET', 'POST'])
+def health_check():
+	timestamp = get_milis(datetime.now())
     item = {'ip': ip_address,
             'lastAlive': timestamp
             }
     table.put_item(Item=item)
+    return f'it is I {ip_address} - at time {timestamp} im still alive'
 
 def get_live_node_list():
-    # response = table.scan()
     now = datetime.now()
     past_periond = now - datetime.timedelta(seconds=delay_period)
     response = table.query(
@@ -103,15 +104,9 @@ def get_internaly():
                            'item': item[0]})
     return response
 
-def checker_thread():
-    while True:
-    	signal_alive()
-    	time.sleep(5)
 
   
 if __name__ == '__main__':
 	ip_address = requests.get('https://api.ipify.org').text
 	print('My public IP address is: {}'.format(ip_address))	
-	x = threading.Thread(target=checker_thread)
-	x.start()
 	app.run(host='0.0.0.0', port=8080)
