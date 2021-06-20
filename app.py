@@ -45,9 +45,9 @@ def get_nodes(key):
 
 def get_url(node, key, op, data=None, expiration_date=None):
     if op == 'put':
-        return f'http://{node}:5000/{op}_internaly?str_key={key}&data={data}&expiration_date={expiration_date}'
+        return f'http://{node}:8080/{op}_internaly?str_key={key}&data={data}&expiration_date={expiration_date}'
     else:
-        return f'http://{node}:5000/{op}_internaly?str_key={key}'
+        return f'http://{node}:8080/{op}_internaly?str_key={key}'
 
 
 @app.route('/put', methods=['GET', 'POST'])
@@ -114,4 +114,4 @@ if __name__ == '__main__':
 	print('My public IP address is: {}'.format(ip_address))	
 	x = threading.Thread(target=checker_thread)
 	x.start()
-	app.run(host='0.0.0.0', port=5000)
+	app.run(host='0.0.0.0', port=8080)
