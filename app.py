@@ -54,7 +54,7 @@ def get_milis(dt):
 def get_nodes(key):
     try:
         app.logger.info(f'get_nodes')
-        nodes = get_live_node_list()
+        nodes = get_live_node_list().sort()
         temp_key = xxhash.xxh64_intdigest(key) % 1024
         node = nodes[(temp_key % len(nodes))]
         alt_node = nodes[((temp_key + 1) % len(nodes))]
@@ -129,9 +129,13 @@ def put_internaly():
 def get_internaly():
     key = request.args.get('str_key')
     # getting the data out of the cache
-    item = cache[key]
-    response = json.dumps({'status code': 200,
-                           'item': item[0]})
+    try:
+        item = cache[key]
+        response = json.dumps({'status code': 200,
+                               'item': item[0]})
+    except:
+        response = json.dumps({'status code': 404,
+                               'item': "item does not exists"})
     return response
 
   
