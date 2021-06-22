@@ -55,7 +55,7 @@ def get_nodes(key):
     try:
         app.logger.info(f'get_nodes')
         nodes = get_live_node_list()
-        nodes.sort()
+        #nodes.sort()
         temp_key = xxhash.xxh64_intdigest(key) % 1024
         node = nodes[(temp_key % len(nodes))]
         alt_node = nodes[((temp_key + 1) % len(nodes))]
