@@ -152,6 +152,7 @@ Resources:
             sudo apt-get install python3-flask -y
             pip3 install xxhash
             pip3 install boto3
+            pip3 install jump-consistent-hash
             cd /home/ubuntu
             git clone https://github.com/edenbartov/cloud-computing.git
             cd cloud-computing && python3 app.py
@@ -178,6 +179,7 @@ Resources:
             sudo apt-get install python3-flask -y
             pip3 install xxhash
             pip3 install boto3
+            pip3 install jump-consistent-hash
             cd /home/ubuntu
             git clone https://github.com/edenbartov/cloud-computing.git
             cd cloud-computing && python3 app.py
@@ -205,6 +207,7 @@ Resources:
             sudo apt-get install python3-flask -y
             pip3 install xxhash
             pip3 install boto3
+            pip3 install jump-consistent-hash
             cd /home/ubuntu
             git clone https://github.com/edenbartov/cloud-computing.git
             cd cloud-computing && python3 app.py
@@ -232,6 +235,7 @@ Resources:
             sudo apt-get install python3-flask -y
             pip3 install xxhash
             pip3 install boto3
+            pip3 install jump-consistent-hash
             cd /home/ubuntu
             git clone https://github.com/edenbartov/cloud-computing.git
             cd cloud-computing && python3 app.py
