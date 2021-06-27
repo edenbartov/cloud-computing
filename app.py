@@ -47,10 +47,15 @@ def repartition(current_num_nodes):
         old_node_index = jump.hash(v_key, live_nodes_pool_size)
         # need to send all the data to the new node
         if new_node_index != old_node_index:
+            bucket = cache.pop(v_key)
             alt_node = jump.hash((v_key+1) % 1024, current_num_nodes)
-            for key in cache[v_key]:
-                data, expiration_date = cache[v_key][key]
-                put_data(key, data, expiration_date, v_key, new_node_index, alt_node)
+            for key in bucket:
+                data, expiration_date = bucket[key]
+                try:
+                    put_data(key, data, expiration_date, v_key, new_node_index, alt_node)
+                except:
+                    continue
+
 
     live_nodes_pool_size = current_num_nodes
 def get_live_node_list():
@@ -79,8 +84,8 @@ def get_nodes(key):
         nodes = get_live_node_list()
         nodes.sort()
         v_key = get_v_key(key)
-        node = jump.hash(v_key, len(nodes))
-        alt_node = jump.hash((v_key + 1) % 1024, len(nodes))
+        node = nodes[jump.hash(v_key, len(nodes))]
+        alt_node = nodes[jump.hash((v_key + 1) % 1024, len(nodes))]
         return v_key, node, alt_node
     except Exception as e:
         app.logger.info(f'failed in the get_nodes {e}')
@@ -108,19 +113,15 @@ def put():
     try:
         ans = put_data(key, data, expiration_date, v_key, node, alt_node)
     except:
-        return json.dumps({'status_code': 404}).json()
+        return json.dumps({'status_code': 404})
 
     return ans.json()
 
 
 def put_data(key, data, expiration_date, v_key, node, alt_node):
-    try:
-        ans = requests.post(get_url(node, key, 'put', v_key, data, expiration_date))
-        ans = requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date))
-    except:
-        return json.dumps({'status_code': 404}).json()
-
-    return ans.json()
+    ans = requests.post(get_url(node, key, 'put', v_key, data, expiration_date))
+    ans = requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date))
+    return ans
 
 
 @app.route('/put_internaly', methods=['GET', 'POST'])
