@@ -158,11 +158,10 @@ def get():
     # TODO check if the node is me
     try:
         ans = requests.get(get_url(node, key, 'get', v_key))
-        if json.loads(ans)['status code'] == 404:
+        if ans.json().get('status code') == 404:
             ans = requests.get(get_url(alt_node, key, 'get', v_key))
     except requests.exceptions.ConnectionError:
         return ans
-
     return ans.json().get('item')
 
 
