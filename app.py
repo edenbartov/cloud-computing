@@ -48,7 +48,7 @@ def repartition(current_num_nodes):
         # need to send all the data to the new node
         if new_node_index != old_node_index:
             bucket = cache.pop(v_key)
-            #alt_node = jump.hash((v_key+1) % 1024, current_num_nodes)
+            # alt_node = jump.hash((v_key+1) % 1024, current_num_nodes)
             node = live_nodes_list[new_node_index]
             alt_node = live_nodes_list[(new_node_index + 1) % current_num_nodes]
             for key in bucket:
@@ -58,8 +58,9 @@ def repartition(current_num_nodes):
                 except:
                     continue
 
-
     live_nodes_pool_size = current_num_nodes
+
+
 def get_live_node_list():
     try:
         app.logger.info('get_live_node_list')
@@ -89,14 +90,14 @@ def get_nodes(key):
         index = jump.hash(v_key, len(nodes))
         node = nodes[index]
         # alt_node = nodes[jump.hash((v_key + 1) % 1024, len(nodes))]
-        alt_node = nodes[(index + 1)%len(nodes)]
+        alt_node = nodes[(index + 1) % len(nodes)]
         return v_key, node, alt_node
     except Exception as e:
         app.logger.info(f'failed in the get_nodes {e}')
         return None
 
 
-def get_url(node, key, op, v_key,data=None, expiration_date=None):
+def get_url(node, key, op, v_key, data=None, expiration_date=None):
     if op == 'put':
         return f'http://{node}:8080/{op}_internaly?v_key={v_key}&str_key={key}&data={data}' \
                f'&expiration_date={expiration_date}'
@@ -177,6 +178,7 @@ def get_internaly():
         response = json.dumps({'status code': 404,
                                'item': "item does not exists"})
     return response
+
 
 if __name__ == '__main__':
     ip_address = requests.get('https://api.ipify.org').text
