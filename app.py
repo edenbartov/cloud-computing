@@ -43,14 +43,15 @@ def status_check():
 def repartition(current_num_nodes):
     global live_nodes_pool_size
     for v_key in cache:
-        new_node_index = jump.hash(v_key, current_num_nodes)
-        old_node_index = jump.hash(v_key, live_nodes_pool_size)
+        new_node_index = jump.hash(int(v_key), current_num_nodes)
+        old_node_index = jump.hash(int(v_key), live_nodes_pool_size)
         # need to send all the data to the new node
         if new_node_index != old_node_index:
             bucket = cache.pop(v_key)
             # alt_node = jump.hash((v_key+1) % 1024, current_num_nodes)
-            node = live_nodes_list[new_node_index]
-            alt_node = live_nodes_list[(new_node_index + 1) % current_num_nodes]
+            nodes = get_live_node_list()
+            node = nodes[new_node_index]
+            alt_node = nodes[(new_node_index + 1) % current_num_nodes]
             for key in bucket:
                 data, expiration_date = bucket[key]
                 try:
