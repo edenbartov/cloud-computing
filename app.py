@@ -145,7 +145,8 @@ def put_internaly():
         cache[v_key] = bucket
         return json.dumps({'status code': 200,
                            'item': cache[v_key][key],
-                           'ip': ip_address})
+                           'ip': ip_address,
+                           'v_key': v_key})
 
     except:
         return "failed in put_internaly"
@@ -175,7 +176,8 @@ def get_internaly():
         item = cache[v_key][key]
         response = json.dumps({'status code': 200,
                                'item': item[0],
-                               'ip': ip_address})
+                               'ip': ip_address,
+                               'v_key': v_key})
     except:
         response = json.dumps({'status code': 404,
                                'item': "item does not exists"})
