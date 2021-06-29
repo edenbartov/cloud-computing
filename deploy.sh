@@ -1,5 +1,6 @@
-KEY_NAME="Eden-Yaron-`date +'%F'`"
+KEY_NAME="yaron-eden-ex2-key"
 KEY_PEM="$KEY_NAME.pem"
+STACK_NAME="yaron-eden-stack"
 
 echo "create key pair $KEY_PEM to connect to instances and save locally"
 aws ec2 create-key-pair --key-name $KEY_NAME  --query "KeyMaterial" --output text > $KEY_PEM
@@ -28,7 +29,7 @@ echo $VPC_ID
 echo $VPC_CIDR_BLOCK
 
 echo "createing stack yaron-eden stack"
-STACK_RES=$(aws cloudformation create-stack --stack-name yaron-eden-stack --template-body file://ec2CloudFormation.yml --capabilities CAPABILITY_IAM \
+STACK_RES=$(aws cloudformation create-stack --stack-name $STACK_NAME --template-body file://ec2CloudFormation.yml --capabilities CAPABILITY_NAMED_IAM \
 	--parameters ParameterKey=InstanceType,ParameterValue=t2.micro \
 	ParameterKey=KeyName,ParameterValue=$KEY_NAME \
 	ParameterKey=SSHLocation,ParameterValue=$MY_IP/32 \
@@ -39,44 +40,49 @@ STACK_RES=$(aws cloudformation create-stack --stack-name yaron-eden-stack --temp
 	ParameterKey=VPCId,ParameterValue=$VPC_ID \
 	ParameterKey=VPCcidr,ParameterValue=$VPC_CIDR_BLOCK)
 
-echo "waiting for stack yaron-eden-stack to be created"
+echo "waiting for stack $STACK_NAME to be created"
 STACK_ID=$(echo $STACK_RES | jq -r '.StackId')
 aws cloudformation wait stack-create-complete --stack-name $STACK_ID
 
 REGION=us-east-1
 
 # get the wanted stack 
-STACK=$(aws cloudformation --region $REGION describe-stacks --stack-name yaron-eden-stack | jq -r .Stacks[0])
+STACK=$(aws cloudformation --region $REGION describe-stacks --stack-name $STACK_NAME | jq -r .Stacks[0])
 # stack outputs
 echo "printing stack outputs"
 OUTPUTS=$(echo $STACK | jq -r .Outputs)
 echo $OUTPUTS
 
 echo "getting instances IP"
-PUBLIC_IP_1=$(aws cloudformation --region $REGION describe-stacks --stack-name yaron-eden-stack --query "Stacks[0].Outputs[?OutputKey=='Instance1IP'].OutputValue" --output text)
-PUBLIC_IP_2=$(aws cloudformation --region $REGION describe-stacks --stack-name yaron-eden-stack --query "Stacks[0].Outputs[?OutputKey=='Instance2IP'].OutputValue" --output text)
-PUBLIC_IP_3=$(aws cloudformation --region $REGION describe-stacks --stack-name yaron-eden-stack --query "Stacks[0].Outputs[?OutputKey=='Instance3IP'].OutputValue" --output text)
-PUBLIC_IP_4=$(aws cloudformation --region $REGION describe-stacks --stack-name yaron-eden-stack --query "Stacks[0].Outputs[?OutputKey=='Instance4IP'].OutputValue" --output text)
+PUBLIC_IP_1=$(aws cloudformation --region $REGION describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='Instance1IP'].OutputValue" --output text)
+PUBLIC_IP_2=$(aws cloudformation --region $REGION describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='Instance2IP'].OutputValue" --output text)
+PUBLIC_IP_3=$(aws cloudformation --region $REGION describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='Instance3IP'].OutputValue" --output text)
+PUBLIC_IP_4=$(aws cloudformation --region $REGION describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='Instance4IP'].OutputValue" --output text)
+ID4=$(aws cloudformation --region $REGION describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='InstanceId4'].OutputValue" --output text)
+TGARN=$(aws cloudformation --region $REGION describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='TargetGroup'].OutputValue" --output text)
 
+
+
+echo "waiting for instance to load"
+sleep 30
+#aws ec2 wait instance-status-ok --instance-ids $ID4
+#target health check command
+#aws elbv2 describe-target-health  --target-group-arn $TGARN
+
+
+echo "waiting for instances to wake up properly"
 DNS_ADD=$(aws elbv2 describe-load-balancers --names YaronandEdenELB | jq -r .LoadBalancers[0].DNSName)
+
+#curl -X GET "@$DNS_ADD/health-check"
+#sleep 1
+#curl -X GET "@$PUBLIC_IP_1:8080/health-check"
+#curl -X GET "@$PUBLIC_IP_2:8080/health-check"
+#curl -X GET "@$PUBLIC_IP_3:8080/health-check"
+#curl -X GET "@$PUBLIC_IP_4:8080/health-check"
+#sleep 1
+
+echo "access the ELB using this address:"
 echo $DNS_ADD
-
-# ssh-add ./$KEY_PEM
-
-# echo "cloning repo"
-# ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_1 'git clone https://github.com/edenbartov/cloud-computing.git'
-# ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_2 'git clone https://github.com/edenbartov/cloud-computing.git'
-# ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_3 'git clone https://github.com/edenbartov/cloud-computing.git'
-# ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_4 'git clone https://github.com/edenbartov/cloud-computing.git'
-
-# echo "waiting 10 seconds for all the dependecies to install"
-# sleep 10
-
-# echo "running the code"
-# ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_1 'cd cloud-computing && python3 app.py' -eaf
-# ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_2 'cd cloud-computing && python3 app.py' -eaf
-# ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_3 'cd cloud-computing && python3 app.py' -eaf
-# ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP_4 'cd cloud-computing && python3 app.py' -eaf
 
 echo "done"
 
