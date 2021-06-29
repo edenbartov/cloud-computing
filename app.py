@@ -127,7 +127,7 @@ def put():
 
 def put_data(key, data, expiration_date, v_key, node, alt_node):
     ans = requests.post(get_url(node, key, 'put', v_key, data, expiration_date))
-    ans = requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date))
+    backup = requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date))
     return ans
 
 
@@ -145,7 +145,8 @@ def put_internaly():
         bucket[key] = (data, expiration_date)
         cache[v_key] = bucket
         return json.dumps({'status code': 200,
-                           'item': cache[v_key][key]})
+                           'item': cache[v_key][key],
+                           'ip': ip_address})
 
     except:
         return "failed in put_internaly"
@@ -163,7 +164,7 @@ def get():
             ans = requests.get(get_url(alt_node, key, 'get', v_key))
     except requests.exceptions.ConnectionError:
         return ans
-    return ans.json().get('item')
+    return ans
 
 
 @app.route('/get_internaly', methods=['GET', 'POST'])
@@ -174,7 +175,8 @@ def get_internaly():
     try:
         item = cache[v_key][key]
         response = json.dumps({'status code': 200,
-                               'item': item[0]})
+                               'item': item[0],
+                               'ip': ip_address})
     except:
         response = json.dumps({'status code': 404,
                                'item': "item does not exists"})
