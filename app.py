@@ -46,16 +46,12 @@ def repartition(current_num_nodes):
         new_node_index = jump.hash(int(v_key), current_num_nodes)
         old_node_index = jump.hash(int(v_key), live_nodes_pool_size)
         nodes = get_live_node_list()
-        
-        new_alt_node_index = (new_node_index + 1) % current_num_nodes
-        old_alt_node_index = (old_node_index + 1) % live_nodes_pool_size
-
         # need to send all the data to the new node
-        if (nodes[new_node_index] != nodes[old_node_index]) or (nodes[new_alt_node_index] != nodes[old_alt_node_index]):
+        if nodes[new_node_index] != nodes[old_node_index]:
             bucket = cache.pop(v_key)
             # alt_node = jump.hash((v_key+1) % 1024, current_num_nodes)
             node = nodes[new_node_index]
-            alt_node = nodes[new_alt_node_index]
+            alt_node = nodes[(new_node_index + 1) % current_num_nodes]
             for key in bucket:
                 data, expiration_date = bucket[key]
                 try:
@@ -129,28 +125,18 @@ def put():
 
 
 def put_data(key, data, expiration_date, v_key, node, alt_node):
-    if node == ip_address:
-        ans = put_in_cache(v_key, key, data, expiration_date)
-    else:
-        ans = requests.post(get_url(node, key, 'put', v_key, data, expiration_date))
-    if alt_node == ip_address:
-        put_in_cache(v_key, key, data, expiration_date)
-    else:
-        requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date))
+    ans = requests.post(get_url(node, key, 'put', v_key, data, expiration_date))
+    backup = requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date))
     return ans
 
 
 @app.route('/put_internaly', methods=['GET', 'POST'])
 def put_internaly():
-    v_key = request.args.get('v_key')
-    key = request.args.get('str_key')
-    data = request.args.get('data')
-    expiration_date = request.args.get('expiration_date')
-    put_in_cache(v_key, key, data, expiration_date)
-
-
-def put_in_cache(v_key, key, data, expiration_date):
     try:
+        v_key = request.args.get('v_key')
+        key = request.args.get('str_key')
+        data = request.args.get('data')
+        expiration_date = request.args.get('expiration_date')
         # actually setting the data
         bucket = cache.get(v_key)
         if not bucket:
