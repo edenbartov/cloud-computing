@@ -173,9 +173,9 @@ def get():
     v_key, node, alt_node = get_nodes(key)
     # TODO check if the node is me
     try:
-        ans = requests.get(get_url(node, key, 'get', v_key))
+        ans = requests.get(get_url(node, key, 'get', v_key), timeout=5)
         if ans.json().get('status code') == 404:
-            ans = requests.get(get_url(alt_node, key, 'get', v_key))
+            ans = requests.get(get_url(alt_node, key, 'get', v_key), timeout=5)
     except requests.exceptions.ConnectionError:
         return ans.json()
     return ans.json()
