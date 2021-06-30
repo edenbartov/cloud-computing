@@ -146,7 +146,7 @@ def put_internaly():
     key = request.args.get('str_key')
     data = request.args.get('data')
     expiration_date = request.args.get('expiration_date')
-    put_in_cache(v_key, key, data, expiration_date)
+    return put_in_cache(v_key, key, data, expiration_date)
 
 
 def put_in_cache(v_key, key, data, expiration_date):
