@@ -3,6 +3,7 @@ import xxhash
 from datetime import datetime
 from flask import Flask, request
 import requests
+from requests.exceptions import Timeout,ConnectionError
 import boto3
 import logging
 import jump
@@ -176,7 +177,8 @@ def get():
         ans = requests.get(get_url(node, key, 'get', v_key), timeout=5)
         if ans.json().get('status code') == 404:
             ans = requests.get(get_url(alt_node, key, 'get', v_key), timeout=5)
-    except requests.exceptions.ConnectionError:
+    except (ConnectionError, Timeout):
+        ans = requests.get(get_url(alt_node, key, 'get', v_key), timeout=5)
         return ans.json()
     return ans.json()
 
