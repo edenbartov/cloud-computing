@@ -172,15 +172,6 @@ def put_in_cache(v_key, key, data, expiration_date):
 def get():
     key = request.args.get('str_key')
     v_key, node, alt_node = get_nodes(key)
-    # check internally
-    try:
-        item = cache[v_key][key]
-        ans = json.dumps({'status code': 200,
-                          'item': item[0],
-                          'ip': ip_address,
-                          'v_key': v_key})
-    except:
-        pass
     try:
         ans = requests.get(get_url(node, key, 'get', v_key), timeout=5)
         if ans.json().get('status code') == 404:
