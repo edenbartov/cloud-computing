@@ -3,7 +3,7 @@ import xxhash
 from datetime import datetime
 from flask import Flask, request
 import requests
-from requests.exceptions import Timeout,ConnectionError
+from requests.exceptions import Timeout, ConnectionError
 import boto3
 import logging
 import jump
@@ -126,16 +126,16 @@ def put():
     except:
         return json.dumps({'status_code': 404})
 
-    return ans
+    return ans, 200
 
 
 def put_data(key, data, expiration_date, v_key, node, alt_node):
     if node == ip_address:
-        ans = put_in_cache(v_key, key, data, expiration_date)
+        ans = json.loads(put_in_cache(v_key, key, data, expiration_date))
     else:
         ans = requests.post(get_url(node, key, 'put', v_key, data, expiration_date)).json()
     if alt_node == ip_address:
-        put_in_cache(v_key, key, data, expiration_date)
+        json.loads(put_in_cache(v_key, key, data, expiration_date))
     else:
         requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date)).json()
     return ans
@@ -172,7 +172,6 @@ def put_in_cache(v_key, key, data, expiration_date):
 def get():
     key = request.args.get('str_key')
     v_key, node, alt_node = get_nodes(key)
-    # TODO check if the node is me
     try:
         ans = requests.get(get_url(node, key, 'get', v_key), timeout=5)
         if ans.json().get('status code') == 404:
@@ -180,7 +179,7 @@ def get():
     except (ConnectionError, Timeout):
         ans = requests.get(get_url(alt_node, key, 'get', v_key), timeout=5)
         return ans.json()
-    return ans.json()
+    return ans.json(), 200
 
 
 @app.route('/get_internaly', methods=['GET', 'POST'])
