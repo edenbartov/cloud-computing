@@ -43,7 +43,8 @@ def status_check():
 
 def repartition(current_num_nodes):
     global live_nodes_pool_size
-    for v_key in cache:
+    temp_dict = cache.copy()
+    for v_key in temp_dict:
         new_node_index = jump.hash(int(v_key), current_num_nodes)
         old_node_index = jump.hash(int(v_key), live_nodes_pool_size)
         nodes = get_live_node_list()
@@ -198,7 +199,7 @@ def get_internaly():
 
 @app.route('/get_all', methods=['GET', 'POST'])
 def get_all():
-    buffer = cache
+    buffer = cache.copy()
     buffer['nodes'] = live_nodes_list
     buffer['num node'] = live_nodes_pool_size
     return json.dumps(buffer)
