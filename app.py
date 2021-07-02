@@ -81,7 +81,7 @@ def get_live_node_list():
                 nodes.append(x['ip'])
         nodes.sort()
         live_nodes_list = nodes
-        live_nodes_pool_size = len(nodes)
+        #live_nodes_pool_size = len(nodes)
         return nodes
     except Exception as e:
         app.logger.info(f'error in get_live_node_list {e}')
@@ -94,6 +94,7 @@ def get_v_key(key):
 
 def get_nodes(key):
     try:
+        status_check()
         nodes = get_live_node_list()
         v_key = get_v_key(key)
         index = jump.hash(v_key, len(nodes))
@@ -201,6 +202,10 @@ def get_internaly():
                                'item': "item does not exists"})
     return response
 
+
+@app.route('/print_cache', methods=['GET', 'POST'])
+def get_internaly():
+    return json.dumps(cache)
 
 if __name__ == '__main__':
     ip_address = requests.get('https://api.ipify.org').text
