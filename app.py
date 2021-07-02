@@ -200,8 +200,9 @@ def get_internaly():
     return response
 
 @app.route('/get_all', methods=['GET', 'POST'])
-def put_internaly():
+def get_all():
     return json.dumps(cache)
+
 
 
 if __name__ == '__main__':
