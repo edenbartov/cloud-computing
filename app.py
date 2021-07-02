@@ -3,7 +3,7 @@ import xxhash
 from datetime import datetime
 from flask import Flask, request
 import requests
-from requests.exceptions import Timeout,ConnectionError
+from requests.exceptions import Timeout, ConnectionError
 import boto3
 import logging
 import jump
@@ -68,8 +68,6 @@ def repartition(current_num_nodes):
 
 
 def get_live_node_list():
-    global live_nodes_list
-    global live_nodes_pool_size
     try:
         app.logger.info('get_live_node_list')
         now = get_milis(datetime.now())
@@ -81,7 +79,6 @@ def get_live_node_list():
                 nodes.append(x['ip'])
         nodes.sort()
         live_nodes_list = nodes
-        #live_nodes_pool_size = len(nodes)
         return nodes
     except Exception as e:
         app.logger.info(f'error in get_live_node_list {e}')
@@ -94,7 +91,6 @@ def get_v_key(key):
 
 def get_nodes(key):
     try:
-        status_check()
         nodes = get_live_node_list()
         v_key = get_v_key(key)
         index = jump.hash(v_key, len(nodes))
@@ -135,11 +131,11 @@ def put():
 
 def put_data(key, data, expiration_date, v_key, node, alt_node):
     if node == ip_address:
-        ans = json.loads(put_in_cache(v_key, key, data, expiration_date))
+        ans = put_in_cache(v_key, key, data, expiration_date)
     else:
         ans = requests.post(get_url(node, key, 'put', v_key, data, expiration_date)).json()
     if alt_node == ip_address:
-        json.loads(put_in_cache(v_key, key, data, expiration_date))
+        put_in_cache(v_key, key, data, expiration_date)
     else:
         requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date)).json()
     return ans
@@ -176,6 +172,7 @@ def put_in_cache(v_key, key, data, expiration_date):
 def get():
     key = request.args.get('str_key')
     v_key, node, alt_node = get_nodes(key)
+    # TODO check if the node is me
     try:
         ans = requests.get(get_url(node, key, 'get', v_key), timeout=5)
         if ans.json().get('status code') == 404:
@@ -202,10 +199,10 @@ def get_internaly():
                                'item': "item does not exists"})
     return response
 
-
-@app.route('/print_cache', methods=['GET', 'POST'])
-def get_internaly():
+@app.route('/get_all', methods=['GET', 'POST'])
+def put_internaly():
     return json.dumps(cache)
+
 
 if __name__ == '__main__':
     ip_address = requests.get('https://api.ipify.org').text
