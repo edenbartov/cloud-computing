@@ -68,6 +68,8 @@ def repartition(current_num_nodes):
 
 
 def get_live_node_list():
+    global live_nodes_list
+    global live_nodes_pool_size
     try:
         app.logger.info('get_live_node_list')
         now = get_milis(datetime.now())
@@ -79,6 +81,7 @@ def get_live_node_list():
                 nodes.append(x['ip'])
         nodes.sort()
         live_nodes_list = nodes
+        live_nodes_pool_size = len(nodes)
         return nodes
     except Exception as e:
         app.logger.info(f'error in get_live_node_list {e}')
