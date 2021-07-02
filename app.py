@@ -37,7 +37,7 @@ def health_check():
 def status_check():
     current_live_nodes = get_live_node_list()
     current_num_nodes = len(current_live_nodes)
-    if current_live_nodes != live_nodes_pool_size:
+    if current_num_nodes != live_nodes_pool_size:
         repartition(current_num_nodes)
 
 
@@ -53,8 +53,9 @@ def repartition(current_num_nodes):
 
         # need to send all the data to the new node
         max_index = max([old_node_index, new_node_index, new_alt_node_index, old_alt_node_index])
-        if (max_index >= current_num_nodes or nodes[new_node_index] != nodes[old_node_index]) \
-                or (nodes[new_alt_node_index] != nodes[old_alt_node_index]):
+        # if (max_index >= current_num_nodes or nodes[new_node_index] != nodes[old_node_index]) \
+        #         or (nodes[new_alt_node_index] != nodes[old_alt_node_index]):
+        if True:
             bucket = cache.pop(v_key)
             # alt_node = jump.hash((v_key+1) % 1024, current_num_nodes)
             node = nodes[new_node_index]
