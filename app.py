@@ -68,6 +68,7 @@ def repartition(current_num_nodes):
 
 
 def get_live_node_list():
+    global live_nodes_list
     try:
         app.logger.info('get_live_node_list')
         now = get_milis(datetime.now())
@@ -166,7 +167,6 @@ def put_in_cache(v_key, key, data, expiration_date):
 def get():
     key = request.args.get('str_key')
     v_key, node, alt_node = get_nodes(key)
-    # TODO check if the node is me
     try:
         ans = requests.get(get_url(node, key, 'get', v_key), timeout=5)
         if ans.json().get('status code') == 404:
@@ -195,7 +195,10 @@ def get_internaly():
 
 @app.route('/get_all', methods=['GET', 'POST'])
 def get_all():
-    return json.dumps(cache)
+    buffer = cache
+    buffer['nodes'] = live_nodes_list
+    buffer['num node'] = live_nodes_pool_size
+    return json.dumps(buffer)
 
 
 
