@@ -38,16 +38,15 @@ def status_check():
     current_live_nodes = get_live_node_list()
     current_num_nodes = len(current_live_nodes)
     if current_num_nodes != live_nodes_pool_size:
-        repartition(current_num_nodes)
+        repartition(current_num_nodes, current_live_nodes)
 
 
-def repartition(current_num_nodes):
+def repartition(current_num_nodes, nodes):
     global live_nodes_pool_size
     temp_dict = cache.copy()
     for v_key in temp_dict:
         new_node_index = jump.hash(int(v_key), current_num_nodes)
         old_node_index = jump.hash(int(v_key), live_nodes_pool_size)
-        nodes = get_live_node_list()
 
         new_alt_node_index = (new_node_index + 1) % current_num_nodes
         old_alt_node_index = (old_node_index + 1) % live_nodes_pool_size
@@ -55,9 +54,8 @@ def repartition(current_num_nodes):
         # need to send all the data to the new node
         max_index = max([old_node_index, new_node_index, new_alt_node_index, old_alt_node_index])
         if (max_index >= current_num_nodes or nodes[new_node_index] != nodes[old_node_index]) \
-                or (nodes[new_alt_node_index] != nodes[old_alt_node_index]):
+                or (nodes[new_alt_node_index] != nodes[old_alt_node_index]) or new_node_index!= old_node_index:
             bucket = cache.pop(v_key)
-            # alt_node = jump.hash((v_key+1) % 1024, current_num_nodes)
             node = nodes[new_node_index]
             alt_node = nodes[new_alt_node_index]
             for key in bucket:
