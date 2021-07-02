@@ -126,18 +126,18 @@ def put():
     except:
         return json.dumps({'status_code': 404})
 
-    return ans.json()
+    return ans
 
 
 def put_data(key, data, expiration_date, v_key, node, alt_node):
     if node == ip_address:
         ans = json.loads(put_in_cache(v_key, key, data, expiration_date))
     else:
-        ans = requests.post(get_url(node, key, 'put', v_key, data, expiration_date))
+        ans = requests.post(get_url(node, key, 'put', v_key, data, expiration_date)).json()
     if alt_node == ip_address:
         json.loads(put_in_cache(v_key, key, data, expiration_date))
     else:
-        requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date))
+        requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date)).json()
     return ans
 
 
