@@ -54,9 +54,8 @@ def repartition(current_num_nodes):
 
         # need to send all the data to the new node
         max_index = max([old_node_index, new_node_index, new_alt_node_index, old_alt_node_index])
-        # if (max_index >= current_num_nodes or nodes[new_node_index] != nodes[old_node_index]) \
-        #         or (nodes[new_alt_node_index] != nodes[old_alt_node_index]):
-        if True:
+        if (max_index >= current_num_nodes or nodes[new_node_index] != nodes[old_node_index]) \
+                or (nodes[new_alt_node_index] != nodes[old_alt_node_index]):
             bucket = cache.pop(v_key)
             # alt_node = jump.hash((v_key+1) % 1024, current_num_nodes)
             node = nodes[new_node_index]
@@ -197,13 +196,13 @@ def get_internaly():
                                'item': "item does not exists"})
     return response
 
+
 @app.route('/get_all', methods=['GET', 'POST'])
 def get_all():
     buffer = cache.copy()
     buffer['nodes'] = live_nodes_list
     buffer['num node'] = live_nodes_pool_size
     return json.dumps(buffer)
-
 
 
 if __name__ == '__main__':
