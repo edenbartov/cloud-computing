@@ -3,7 +3,7 @@ import xxhash
 from datetime import datetime
 from flask import Flask, request
 import requests
-from requests.exceptions import Timeout, ConnectionError
+from requests.exceptions import Timeout,ConnectionError
 import boto3
 import logging
 import jump
@@ -126,18 +126,18 @@ def put():
     except:
         return json.dumps({'status_code': 404})
 
-    return ans, 200
+    return ans.json()
 
 
 def put_data(key, data, expiration_date, v_key, node, alt_node):
     if node == ip_address:
         ans = json.loads(put_in_cache(v_key, key, data, expiration_date))
     else:
-        ans = requests.post(get_url(node, key, 'put', v_key, data, expiration_date)).json()
+        ans = requests.post(get_url(node, key, 'put', v_key, data, expiration_date))
     if alt_node == ip_address:
         json.loads(put_in_cache(v_key, key, data, expiration_date))
     else:
-        requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date)).json()
+        requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date))
     return ans
 
 
@@ -179,7 +179,7 @@ def get():
     except (ConnectionError, Timeout):
         ans = requests.get(get_url(alt_node, key, 'get', v_key), timeout=5)
         return ans.json()
-    return ans.json(), 200
+    return ans.json()
 
 
 @app.route('/get_internaly', methods=['GET', 'POST'])
