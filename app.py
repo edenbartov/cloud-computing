@@ -50,15 +50,18 @@ def repartition(current_num_nodes, nodes):
 
         new_alt_node_index = (new_node_index + 1) % current_num_nodes
         old_alt_node_index = (old_node_index + 1) % live_nodes_pool_size
-
-        # need to send all the data to the new node
-        max_index = max([old_node_index, new_node_index, new_alt_node_index, old_alt_node_index])
-        # if (max_index >= current_num_nodes or nodes[new_node_index] != nodes[old_node_index]) \
-        #         or (nodes[new_alt_node_index] != nodes[old_alt_node_index]) or new_node_index != old_node_index:
-        if True:
-            bucket = cache.pop(v_key)
+        flag = False
+        try:
             node = nodes[new_node_index]
             alt_node = nodes[new_alt_node_index]
+            old_node = nodes[old_node_index]
+            old_alt_node = nodes[old_alt_node_index]
+            flag = node != old_node or alt_node != old_alt_node
+        except:
+            flag = True
+
+        if flag:
+            bucket = cache.pop(v_key)
             for key in bucket:
                 data, expiration_date = bucket[key]
                 try:
