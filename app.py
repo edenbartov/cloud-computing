@@ -53,8 +53,9 @@ def repartition(current_num_nodes, nodes):
 
         # need to send all the data to the new node
         max_index = max([old_node_index, new_node_index, new_alt_node_index, old_alt_node_index])
-        if (max_index >= current_num_nodes or nodes[new_node_index] != nodes[old_node_index]) \
-                or (nodes[new_alt_node_index] != nodes[old_alt_node_index]) or new_node_index != old_node_index:
+        # if (max_index >= current_num_nodes or nodes[new_node_index] != nodes[old_node_index]) \
+        #         or (nodes[new_alt_node_index] != nodes[old_alt_node_index]) or new_node_index != old_node_index:
+        if True:
             bucket = cache.pop(v_key)
             node = nodes[new_node_index]
             alt_node = nodes[new_alt_node_index]
