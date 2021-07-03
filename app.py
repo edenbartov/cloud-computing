@@ -11,7 +11,6 @@ import jump
 dynamodb = boto3.resource('dynamodb', region_name="us-east-1")
 table = dynamodb.Table('LivingNodes')
 cache = {}
-printed_flag ={}
 app = Flask(__name__)
 delay_period = 12 * 1000  # 12 seconds in milis
 last = 0
@@ -44,7 +43,7 @@ def status_check():
 
 def repartition(current_num_nodes, nodes):
     global live_nodes_pool_size
-    global printed_flag 
+    global live_nodes_list
     temp_dict = cache.copy()
     for v_key in temp_dict:
         new_node_index = jump.hash(int(v_key), current_num_nodes)
@@ -55,12 +54,11 @@ def repartition(current_num_nodes, nodes):
         try:
             node = nodes[new_node_index]
             alt_node = nodes[new_alt_node_index]
-            old_node = nodes[old_node_index]
-            old_alt_node = nodes[old_alt_node_index]
+            old_node = live_nodes_list[old_node_index]
+            old_alt_node = live_nodes_list[old_alt_node_index]
             flag = node != old_node or alt_node != old_alt_node
         except:
             flag = True
-        printed_flag[v_key] = (flag,node,old_node,alt_node,old_alt_node)
         if flag:
             bucket = cache.pop(v_key)
             for key in bucket:
@@ -71,7 +69,7 @@ def repartition(current_num_nodes, nodes):
                     continue
 
     live_nodes_pool_size = current_num_nodes
-
+    live_nodes_list = nodes
 
 def get_live_node_list():
     global live_nodes_list
@@ -85,7 +83,6 @@ def get_live_node_list():
             if int(x['lastAlive']) >= now - delay_period:
                 nodes.append(x['ip'])
         nodes.sort()
-        live_nodes_list = nodes
         return nodes
     except Exception as e:
         app.logger.info(f'error in get_live_node_list {e}')
@@ -211,7 +208,6 @@ def get_all():
     buffer = cache.copy()
     buffer['nodes'] = live_nodes_list
     buffer['num node'] = live_nodes_pool_size
-    buffer['flags'] = printed_flag
     return json.dumps(buffer)
 
 
