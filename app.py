@@ -54,7 +54,7 @@ def repartition(current_num_nodes, nodes):
         # need to send all the data to the new node
         max_index = max([old_node_index, new_node_index, new_alt_node_index, old_alt_node_index])
         if (max_index >= current_num_nodes or nodes[new_node_index] != nodes[old_node_index]) \
-                or (nodes[new_alt_node_index] != nodes[old_alt_node_index]) or new_node_index!= old_node_index:
+                or (nodes[new_alt_node_index] != nodes[old_alt_node_index]) or new_node_index != old_node_index:
             bucket = cache.pop(v_key)
             node = nodes[new_node_index]
             alt_node = nodes[new_alt_node_index]
@@ -128,18 +128,24 @@ def put():
     except:
         return json.dumps({'status_code': 404})
 
-    return ans.json()
+    return ans
 
 
 def put_data(key, data, expiration_date, v_key, node, alt_node):
-    ans = requests.post(get_url(node, key, 'put', v_key, data, expiration_date))
-    requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date))
+    if node == ip_address:
+        ans = json.loads(put_in_cache(v_key, key, data, expiration_date))
+    else:
+        ans = requests.post(get_url(node, key, 'put', v_key, data, expiration_date)).json()
+    if alt_node == ip_address:
+        json.loads(put_in_cache(v_key, key, data, expiration_date))
+    else:
+        requests.post(get_url(alt_node, key, 'put', v_key, data, expiration_date)).json()
     return ans
 
 
 @app.route('/put_internaly', methods=['GET', 'POST'])
 def put_internaly():
-    v_key = request.args.get('v_key')
+    v_key = int(request.args.get('v_key'))
     key = request.args.get('str_key')
     data = request.args.get('data')
     expiration_date = request.args.get('expiration_date')
@@ -181,7 +187,7 @@ def get():
 @app.route('/get_internaly', methods=['GET', 'POST'])
 def get_internaly():
     key = request.args.get('str_key')
-    v_key = request.args.get('v_key')
+    v_key = int(request.args.get('v_key'))
     # getting the data out of the cache
     try:
         item = cache[v_key][key]
